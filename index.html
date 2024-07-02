@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS 194-26 Project 1</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto&display=swap" rel="stylesheet">    
+</head>
+<body>
+    <!--Title Information-->
+	<div id="header">
+        <center>
+            <div id="title"><h1>CS 194-26: Image Manipulation and Computational Photography (Fall 2022)</h1></div>
+            <div id="title"><h1>Project 1: <i>Colorizing the Prokudin-Gorskii photo collection</i></h1></div>
+            <!--<div id="subheader"><h2>Alison Siebert</h2></div>-->
+        </center>
+    </div>
+    <!--Brief overview of the project-->
+    <div id="overview">
+        <div id="otitle"><h2>Overview</h2></div>
+        <p>The objective of this project is to colorize digitized Prokudin-Gorskii glass plate images. Given an input of a glass plate image, 
+            we extract the three color channel images (red, green, and blue) and built an algorithm to stack and align them using image processing 
+            techniques and produce a single color image as our result.</p>
+    </div>
+    <!--My Approach-->
+    <div id="approach">
+        <div id="txtapproach"><h2>My Approach</h2></div>
+        <!--divide image input into the three distinct color channels, -->
+        <p>The first step of this project is to divide the input image into three distinct sections representing each color channel. 
+            Then, the overall goal is to separately align the green and red images onto to the blue image by translating it using (x, y) vectors. 
+            One problem that I ran into was misalignment caused by transforming the images and their borders.
+            To fix this, all images were cropped by 10% its size on each edge <b>pre-alignment</b> in order to reduce noise from the borders affecting the results. 
+            The naive implementation for low resolution images involved performing an exhaustive search by calculating the SSD (Sum of Squared Differences) of each green and red image with the blue in a window of [-15, 15] pixels.
+            Finding the optimal alignment is then straightforward as it is simply the transformation that achieves the lowest SSD value.
+            This method was also perfomed using NCC (Normalized Cross-Correlation), which achieved very similar results for low-res images.
+            For NCC, we aimed to maximize the absolute value of the correlation to find the optimal alignment. 
+            </p>
+        <p>With higher resolution images, our naive implementation would run very slowly. Thus, we utilized an image pyramid to align larger images recursively.
+            My implementation creates four levels of images by halving the resolution each time (for the high resolution photos), or until the smallest image's resolution/height reached 200 pixels.
+            I stored these images into a list, and then aligned the images starting with the smallest one. For the smallest, I ran SSD with a tolerance of [-15, 15] pixels for displacement. 
+            Going down each level of the pyramid, I offset the images by the previous level's displacement vector multiplied by two to account for the scale factor. 
+            Then, I ran SSD on the images with a shift range of only [-3, 3] and added any new transformations to the offset variables.
+            The result is the optimally aligned photograph.
+        </p>
+    </div>
+
+    <!--Result of Algorithm on all example images-->
+    <div id="results">
+        <div id="txtresults"><h2>Results</h2></div>
+        <p>Here are the results:</p>
+
+        <div id="quality"><h3>Low-Res Plate Images</h3></div>
+
+        <div class="photos">
+            <div class="pic">
+                    <div id="unaligned"><img src="assets/images/un_cath.jpg" width="450" /><img src="assets/images/cath.jpg" width="450" /></div>
+            </div>
+
+            <div class="imgTitle">Cathedral</div>
+            <div class="offsets">Green: [5, 2] Red: [12, 3]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><span><img src="assets/images/un_mona.jpg" width="450"/><img src="assets/images/mona.jpg" width="450"/></div></span>
+            </div>
+            <div class="imgTitle">Monastery</div>
+            <div class="offsets">Green: [-3, 2] Red: [3, 2]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_tobo.jpg" width="450"/><img src="assets/images/tobo.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Tolbolsk</div>
+            <div class="offsets">Green: [3, 3] Red: [6, 3]</div>
+        </div>
+
+        <!-- HIGH RES-->
+        <div id="quality"><h3>High-Res Plate Images</h3></div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_chur.jpg" width="450"/><img src="assets/images/chur.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Church</div>
+            <div class="offsets">Green: [25, 4] Red: [58, -4]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_harv.jpg" width="450"/><img src="assets/images/harv.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Harvesters</div>
+            <div class="offsets">Green: [60, 17] Red: [124, 14]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_icon.jpg" width="450"/><img src="assets/images/icon.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Icon</div>
+            <div class="offsets">Green: [41, 17] Red: [90, 23]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_lady.jpg" width="450"/><img src="assets/images/lady.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Lady</div>
+            <div class="offsets">Green: [52, 9] Red: [112, 12]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_melo.jpg" width="450"/><img src="assets/images/melo.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Melons</div>
+            <div class="offsets">Green: [82, 10] Red: [178, 13]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_onio.jpg" width="450"/><img src="assets/images/onio.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Onion Church</div>
+            <div class="offsets">Green: [52, 26] Red: [108, 36]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_scul.jpg" width="450"/><img src="assets/images/scul.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Sculpture</div>
+            <div class="offsets">Green: [33, -11] Red: [140, -27]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_self.jpg" width="450"/><img src="assets/images/self.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Self Portrait</div>
+            <div class="offsets">Green: [79, 29] Red: [176, 37]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_thre.jpg" width="450"/><img src="assets/images/thre.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Three Generations</div>
+            <div class="offsets">Green: [53, 14] Red: [112, 11]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_trai.jpg" width="450"/><img src="assets/images/trai.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Train</div>
+            <div class="offsets">Green: [42, 6] Red: [87, 32]</div>
+        </div>
+        
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_emir.jpg" width="450"/><img src="assets/images/emir.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Emir</div>
+            <div class="offsets">Green: [49, 24] Red: [100, -205]</div>
+
+            <p>My algorithm failed to align the Emir image due to the disrepancy in pixel values between the three channels. Some channels are much higher in contrast than the others, especially due to the color of his coat. This leads to misalignment because the algorithm assumes that the pixels are similar in value when comparing. </p>
+        </div>
+
+        <!-- Extra Images -->
+        <div id="quality"><h3>Extra Plate Images</h3></div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_vera.jpg" width="450"/><img src="assets/images/vera.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Veranda</div>
+            <div class="offsets">Green: [10, 40] Red: [54, 52]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_lind.jpg" width="450"/><img src="assets/images/lind.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Lindozero</div>
+            <div class="offsets">Green: [13, -1]Red: [82, -2]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_wate.jpg" width="450"/><img src="assets/images/wate.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Waterfall</div>
+            <div class="offsets">Green: [14, -2] Red: [80, -2]</div>
+        </div>
+
+        <div class="photos">
+            <div class="pic">
+                <div id="unaligned"><img src="assets/images/un_suns.jpg" width="450"/><img src="assets/images/suns.jpg" width="450"/></div>
+            </div>
+            <div class="imgTitle">Sunset</div>
+            <div class="offsets">Green: [0, 9] Red: [0, 163]</div>
+        </div>
+    </div>
+    <!--Result of algorithm on few examples of own choosing (downloaded from Prokudin-Gorskii collection)-->
+
+    <!--If your algorithm failed to align any image, provide a brief explanation of why.-->
+
+    <!--Describe any bells and whistles you implemented. For maximum credit, show before and after images.-->
+    <div id="quality"><h2>Bells and Whistles</h2></div>
+
+    <div id="quality"><h3>Auto Contrasting</h3></div>
+    <p>Cropped the image by 10% on eatch edge and automatically rescaled the image intensity (contrast) of the images so the darkest pixel is 0 and the lightest pixel is 1. </p>
+
+    <div class="photos">
+        <div class="pic">
+            <div id="unaligned"><img src="assets/images/harv.jpg" width="450"/><img src="assets/images/con_harv.jpg" width="450"/></div>
+        </div>
+        <div class="imgTitle">Harvest Original (left) &emsp; &emsp; Contrast (right)</div>
+        <p><b>Before:</b> <u>Darkest Pixel:</u> 0.00392156862745098 <u>Lightest Pixel:</u> 0.9872739757381552 </p>
+        <p><b>After:</b> <u>Darkest Pixel:</u> 0.0 <u>Lightest Pixel:</u> 1.0</p>
+    </div>
+
+    <div class="photos">
+        <div class="pic">
+            <div id="unaligned"><img src="assets/images/onio.jpg" width="450"/><img src="assets/images/con_onio.jpg" width="450"/></div>
+        </div>
+        <div class="imgTitle">Original Onion Church (left) &emsp; &emsp; Contrast (right)</div>
+        <p><b>Before:</b> <u>Darkest Pixel:</u> 0.00392156862745098 <u>Lightest Pixel:</u> 0.9718165865568017 </p>
+        <p><b>After:</b> <u>Darkest Pixel:</u> 0.0 <u>Lightest Pixel:</u> 1.0</p>
+    </div>
+</body>
+</html>
